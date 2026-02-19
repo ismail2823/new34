@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gateway</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Cabinet+Grotesk:wght@400;500;700;800&display=swap');
+
+  :root {
+    --bg: #f0ede8;
+    --card: #ffffff;
+    --border: #e0dbd3;
+    --text: #1a1714;
+    --muted: #9a9189;
+    --accent: #ff4d00;
+    --accent2: #0057ff;
+    --shadow: 0 2px 12px rgba(0,0,0,0.08);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Cabinet Grotesk', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  /* Noise texture overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    width: 100%;
+    max-width: 600px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Header */
+  .header {
+    text-align: center;
+    margin-bottom: 40px;
+  }
+
+  .logo-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--text);
+    color: var(--bg);
+    padding: 6px 14px;
+    border-radius: 100px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 1px;
+    margin-bottom: 20px;
+  }
+
+  .logo-dot {
+    width: 6px;
+    height: 6px;
+    background: var(--accent);
+    border-radius: 50%;
+    animation: blink 2s infinite;
+  }
+
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  h1 {
+    font-size: clamp(42px, 8vw, 68px);
+    font-weight: 800;
+    letter-spacing: -2px;
+    line-height: 1;
+    margin-bottom: 12px;
+  }
+
+  h1 span { color: var(--accent); }
+
+  .tagline {
+    color: var(--muted);
+    font-size: 15px;
+    font-family: 'DM Mono', monospace;
+  }
+
+  /* Search card */
+  .search-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 28px;
+    box-shadow: var(--shadow);
+    margin-bottom: 20px;
+  }
+
+  .search-label {
+    font-size: 12px;
+    font-family: 'DM Mono', monospace;
+    color: var(--muted);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+
+  .search-row {
+    display: flex;
+    gap: 10px;
+  }
+
+  #urlInput {
+    flex: 1;
+    background: var(--bg);
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 16px;
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  #urlInput:focus { border-color: var(--accent2); }
+  #urlInput::placeholder { color: var(--muted); }
+
+  .go-btn {
+    background: var(--text);
+    color: var(--bg);
+    border: none;
+    border-radius: 12px;
+    padding: 14px 22px;
+    font-family: 'Cabinet Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+
+  .go-btn:hover {
+    background: var(--accent);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(255,77,0,0.3);
+  }
+
+  /* Quick access */
+  .quick-label {
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+    color: var(--muted);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-top: 20px;
+    margin-bottom: 10px;
+  }
+
+  .quick-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+  }
+
+  .quick-btn {
+    background: var(--bg);
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 8px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .quick-btn:hover {
+    border-color: var(--accent2);
+    color: var(--accent2);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+  }
+
+  .quick-icon { font-size: 20px; display: block; margin-bottom: 4px; }
+
+  /* Info strip */
+  .info-strip {
+    display: flex;
+    gap: 8px;
+    margin-top: 20px;
+  }
+
+  .info-chip {
+    flex: 1;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px;
+    text-align: center;
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  .info-chip strong { display: block; color: var(--text); font-size: 14px; margin-bottom: 2px; }
+
+  /* Footer */
+  .footer {
+    margin-top: 30px;
+    text-align: center;
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+    color: var(--muted);
+  }
+
+  /* Loading state */
+  .loading-bar {
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    margin-top: 16px;
+    overflow: hidden;
+    display: none;
+  }
+
+  .loading-bar.active { display: block; }
+
+  .loading-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border-radius: 2px;
+    animation: load 1.5s ease-in-out infinite;
+    width: 40%;
+  }
+
+  @keyframes load {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(350%); }
+  }
+
+  /* SW status */
+  .sw-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 10px;
+    font-family: 'DM Mono', monospace;
+    color: var(--muted);
+    margin-top: 8px;
+  }
+
+  .sw-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--muted);
+  }
+
+  .sw-dot.ready { background: #22c55e; }
+  .sw-dot.error { background: var(--accent); }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="logo-badge">
+      <div class="logo-dot"></div>
+      GATEWAY PROXY
+    </div>
+    <h1>Browse<span>.</span><br>Freely<span>.</span></h1>
+    <p class="tagline">ultraviolet-powered // unrestricted access</p>
+  </div>
+
+  <!-- Search Card -->
+  <div class="search-card">
+    <div class="search-label">Enter URL or Search</div>
+    <div class="search-row">
+      <input id="urlInput" type="text" placeholder="tiktok.com, youtube.com, google.com...">
+      <button class="go-btn" onclick="navigate()">Go →</button>
+    </div>
+
+    <div class="loading-bar" id="loadingBar">
+      <div class="loading-fill"></div>
+    </div>
+
+    <div class="sw-status">
+      <div class="sw-dot" id="swDot"></div>
+      <span id="swStatus">Initializing service worker...</span>
+    </div>
+
+    <div class="quick-label">Quick Access</div>
+    <div class="quick-grid">
+      <div class="quick-btn" onclick="go('https://www.tiktok.com')">
+        <span class="quick-icon">🎵</span>TikTok
+      </div>
+      <div class="quick-btn" onclick="go('https://www.youtube.com')">
+        <span class="quick-icon">▶️</span>YouTube
+      </div>
+      <div class="quick-btn" onclick="go('https://www.google.com')">
+        <span class="quick-icon">🔍</span>Google
+      </div>
+      <div class="quick-btn" onclick="go('https://www.reddit.com')">
+        <span class="quick-icon">🤖</span>Reddit
+      </div>
+      <div class="quick-btn" onclick="go('https://discord.com/app')">
+        <span class="quick-icon">💬</span>Discord
+      </div>
+      <div class="quick-btn" onclick="go('https://www.instagram.com')">
+        <span class="quick-icon">📸</span>Instagram
+      </div>
+      <div class="quick-btn" onclick="go('https://www.twitch.tv')">
+        <span class="quick-icon">🟣</span>Twitch
+      </div>
+      <div class="quick-btn" onclick="go('https://www.spotify.com')">
+        <span class="quick-icon">🎧</span>Spotify
+      </div>
+    </div>
+  </div>
+
+  <!-- Info strip -->
+  <div class="info-strip">
+    <div class="info-chip">
+      <strong>🔒</strong>
+      Encrypted traffic via bare server
+    </div>
+    <div class="info-chip">
+      <strong>⚡</strong>
+      Service worker proxy
+    </div>
+    <div class="info-chip">
+      <strong>🌍</strong>
+      Bypass any restriction
+    </div>
+  </div>
+
+  <div class="footer">
+    powered by ultraviolet + bare server // open source
+  </div>
+
+</div>
+
+<!-- UV Scripts - loaded from node_modules via server -->
+<script src="/uv/uv.bundle.js"></script>
+<script src="/uv/uv.config.js"></script>
+<script src="/baremux/index.js"></script>
+<script src="/epoxy/index.js"></script>
+
+<script>
+  const swDot = document.getElementById('swDot');
+  const swStatus = document.getElementById('swStatus');
+
+  // Register service worker
+  async function registerSW() {
+    if (!navigator.serviceWorker) {
+      swDot.className = 'sw-dot error';
+      swStatus.textContent = 'Service workers not supported in this browser';
+      return false;
+    }
+
+    try {
+      const reg = await navigator.serviceWorker.register('/uv/uv.sw.js', {
+        scope: __uv$config.prefix,
+      });
+
+      await navigator.serviceWorker.ready;
+
+      // Setup bare mux transport
+      const conn = new BareMux.BareMuxConnection('/baremux/worker.js');
+      const wispUrl = (location.protocol === 'https:' ? 'wss' : 'ws') + '://' + location.host + '/wisp/';
+      await conn.setTransport('/epoxy/index.mjs', [{ wisp: wispUrl }]);
+
+      swDot.className = 'sw-dot ready';
+      swStatus.textContent = 'Proxy ready — you can browse now';
+      return true;
+    } catch (e) {
+      swDot.className = 'sw-dot error';
+      swStatus.textContent = 'Error: ' + e.message;
+      console.error(e);
+      return false;
+    }
+  }
+
+  function processUrl(input) {
+    input = input.trim();
+    // If it looks like a URL
+    if (/^https?:\/\//i.test(input)) return input;
+    if (/^[a-zA-Z0-9-]+\.[a-zA-Z]{2,}/.test(input)) return 'https://' + input;
+    // Otherwise treat as Google search
+    return 'https://www.google.com/search?q=' + encodeURIComponent(input);
+  }
+
+  function go(url) {
+    document.getElementById('urlInput').value = url;
+    navigate();
+  }
+
+  async function navigate() {
+    const input = document.getElementById('urlInput').value;
+    if (!input) return;
+
+    // Show loading
+    document.getElementById('loadingBar').classList.add('active');
+
+    const url = processUrl(input);
+    const proxied = __uv$config.prefix + __uv$config.encodeUrl(url);
+    window.location.href = proxied;
+  }
+
+  // Enter key
+  document.getElementById('urlInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') navigate();
+  });
+
+  // Init
+  registerSW();
+</script>
+
+</body>
+</html>
