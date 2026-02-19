@@ -11,10 +11,10 @@ const __dirname = dirname(__filename);
 const bare = createBareServer("/bare/");
 const app = express();
 
-// Serves files from your /public folder
+// Serves the front-end from the public folder
 app.use(express.static(join(__dirname, "public")));
 
-// Fallback to index.html for the proxy UI
+// Route all requests to index.html for the proxy interface
 app.use((req, res) => {
   res.sendFile(join(__dirname, "public", "index.html"));
 });
@@ -41,5 +41,5 @@ server.on("upgrade", (req, socket, head) => {
 
 const PORT = process.env.PORT || 8000;
 server.listen(PORT, () => {
-  console.log(`🌐 Proxy running on http://localhost:${PORT}`);
+  console.log(`🌐 Proxy running on port ${PORT}`);
 });
