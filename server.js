@@ -11,9 +11,10 @@ const __dirname = dirname(__filename);
 const bare = createBareServer("/bare/");
 const app = express();
 
+// Serves files from your /public folder
 app.use(express.static(join(__dirname, "public")));
 
-// Fallback to index.html for SPA routing
+// Fallback to index.html for the proxy UI
 app.use((req, res) => {
   res.sendFile(join(__dirname, "public", "index.html"));
 });
