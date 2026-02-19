@@ -38,7 +38,7 @@ server.on("upgrade", (req, socket, head) => {
   }
 });
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 8000;
 server.listen(PORT, () => {
   console.log(`🌐 Proxy running on http://localhost:${PORT}`);
 });
