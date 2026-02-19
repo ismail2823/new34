@@ -1,7 +1,6 @@
 {
   "name": "uv-gateway",
   "version": "1.0.0",
-  "description": "Ultraviolet web proxy gateway",
   "type": "module",
   "main": "server.js",
   "scripts": {
